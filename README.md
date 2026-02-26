@@ -70,9 +70,7 @@ cd tf_put && terraform destroy -auto-approve && cd ..
 
 Access control may be defined down to the resource level using wildcards. Moreover it's possible to specify any policy. Having both options, one bucket may be safely shared among different user groups to maintain the KV. Of course each group or service may use a dedicated bucket, which may simplify IAM policies.
 
-Announcing object level granular access control for OCI Object Storage: [Object-level granular access](https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage)
-
-Deny policies: [IAM deny policy syntax](https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm)
+Announcing object level granular access control for OCI Object Storage: [Object-level granular access](https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage) Deny policies: [IAM deny policy syntax](https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm)
 
 ## Encryption
 
