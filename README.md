@@ -142,7 +142,7 @@ OCI Vault Secrets is the native OCI service for storing sensitive values. The ta
 | **Versioning** | Built-in, unlimited versions | Built-in, up to 100 versions per secret |
 | **Access control** | IAM policy down to object name (wildcard) | IAM policy down to individual secret |
 | **Encryption** | Oracle-managed or customer-managed key (MEK) | Always encrypted; customer-managed key via Vault |
-| **Secret rotation** | Manual (put new value) | Automated rotation via functions |
+| **Secret rotation** | Manual (put new value) | Rotation via custom OCI Function (must be authored and configured) |
 | **Expiry / lifecycle** | Object lifecycle rules (time-based deletion) | Secret expiry date, auto-disable/delete |
 | **Audit** | OCI Audit log | OCI Audit log |
 | **Cloud Events** | Object create/update/delete via OCI Events service | Secret create/update/delete and expiry events via OCI Events service |
