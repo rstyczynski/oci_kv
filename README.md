@@ -14,11 +14,13 @@ oci os bucket create --compartment-id $tenancy_ocid --name kv_store
 ### Raw OCI CLI
 
 ```bash
-echo "Lorem ipsum dolor sit amet" > lorem
-oci os object put --bucket-name kv_store --file lorem
+echo "Hello OCI!" > /tmp/oci1
+oci os object put --bucket-name kv_store --file /tmp/oci1
 
-oci os object get --bucket-name kv_store --name lorem --file value
-cat value
+oci os object get --bucket-name kv_store --name /tmp/oci1 --file /tmp/value
+cat /tmp/value
+
+rm /tmp/oci1 /tmp/value
 ```
 
 ### Bash
