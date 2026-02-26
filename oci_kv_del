@@ -1,0 +1,10 @@
+#!/bin/bash
+# Usage: oci_kv_del <key>
+# Bucket is taken from OCI_KV_STORE env var (default: kv_store)
+
+set -euo pipefail
+
+bucket="${OCI_KV_STORE:-kv_store}"
+key="${1:?Usage: oci_kv_del <key>}"
+
+oci os object delete --bucket-name "$bucket" --name "$key" --force

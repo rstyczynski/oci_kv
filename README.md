@@ -4,14 +4,14 @@ Key - Value is a fundamental paradigm in configuration. OCI provides two service
 
 ## Example
 
-Create bucket.
+### Create bucket
 
 ```bash
-tenency_ocid=$(oci os ns get-metadata --query 'data."default-s3-compartment-id"' --raw-output)
-oci os bucket create --compartment-id $tenency_ocid --name kv_store
+tenancy_ocid=$(oci iam availability-domain list --query 'data[0]."compartment-id"' --raw-output)
+oci os bucket create --compartment-id $tenancy_ocid --name kv_store
 ```
 
-Put and get data.
+### Raw OCI CLI
 
 ```bash
 echo "Lorem ipsum dolor sit amet" > lorem
@@ -21,13 +21,12 @@ oci os object get --bucket-name kv_store --name lorem --file value
 cat value
 ```
 
-## Scripts
-
 ### Bash
 
 ```bash
-echo "Hello bash!" | ./oci_kv_put bash1
-./oci_kv_get bash1 
+echo -n "Hello bash!" | ./oci_kv_put bash1
+./oci_kv_get bash1
+./oci_kv_del bash1
 ```
 
 ### Node.js
@@ -35,6 +34,31 @@ echo "Hello bash!" | ./oci_kv_put bash1
 ```bash
 npm install
 
-echo "Hello Node.js!" | node oci_kv_put.js node1
+echo -n "Hello Node.js!" | node oci_kv_put.js node1
 node oci_kv_get.js node1
+node oci_kv_del.js node1
 ```
+
+### Terraform
+
+```bash
+export TF_VAR_key=tf1
+export TF_VAR_value="Hello Terraform!"
+
+# put
+cd tf_put && terraform init && terraform apply -auto-approve && cd ..
+
+# get
+cd tf_get && terraform init && terraform apply -auto-approve && cd ..
+
+# delete
+cd tf_put && terraform destroy -auto-approve && cd ..
+```
+
+## Access control
+
+Access control may be defined down to resource level using wildcards. Moreover it's possible to specify eny policy. Having both oen bucket may be safely shared among different user groups to maintain the KV. Of course each group of service may use dedicated bucket, what may simplify aim policies.
+
+Announcing object level granular access control for OCI Object Storage, https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage
+
+Deny policies, https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm
