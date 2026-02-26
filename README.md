@@ -94,13 +94,15 @@ oci os object list-object-versions --bucket-name kv_store --prefix ver1 \
 
 # get intended version
 oci os object get --bucket-name kv_store --name ver1 --version-id "$version_id" --file /dev/stdout
+
+./oci_kv_del ver1
 ```
 
 The above requires a little effort, but it is intended to be used in special situations.
 
 ## Cloud events
 
-OCI Object Storage emits events for every object operation. These events can trigger OCI Functions, Notifications, or Streaming pipelines, enabling reactive architectures on top of the KV store.
+Once enabled, OCI Object Storage emits events for every object operation. These events can trigger OCI Functions, Notifications, or Streaming pipelines, enabling reactive architectures on top of the KV store.
 
 Relevant event types:
 
