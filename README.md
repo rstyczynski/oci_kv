@@ -21,14 +21,11 @@ oci os bucket create --compartment-id $compartment_ocid --name kv_store --versio
 ### Raw OCI CLI
 
 ```bash
-echo "Hello OCI!" > /tmp/oci1
-oci os object put --bucket-name kv_store --file /tmp/oci1
+echo "Hello OCI!" | oci os object put --bucket-name kv_store --name oci1 --file -
 
-oci os object get --bucket-name kv_store --name oci1 --file /tmp/value
-cat /tmp/value
+oci os object get --bucket-name kv_store --name oci1 --file /dev/stdout
 
-oci os object delete --bucket-name kv_store --name oci1 
-rm /tmp/oci1 /tmp/value
+oci os object delete --bucket-name kv_store --name oci1 --force
 ```
 
 ### Bash
