@@ -1,10 +1,12 @@
 # OCI Key Value
 
-Key - Value is a fundamental paradigm in configuration. OCI provides two services that may be used to build a KV interface. First is an OCI Secret that stores values associated with keys, the second is OCI Object Storage service, which ideally fits KV requirements. Both services support an IAM access layer that controls access to the granularity of an object and object versioning. 
+Key-Value is a fundamental paradigm in configuration. OCI provides two services that may be used to build a KV interface. First is an OCI Secret that stores values associated with keys, the second is the OCI Object Storage service, which ideally fits KV requirements. Both services support an IAM access layer that controls access to the granularity of an object and object versioning.
 
 ## Example
 
 The example below demonstrates how to use OCI Object Storage for KV purposes. It creates a KV bucket to execute a series of put, get, and delete operations using OCI CLI, bash, Node.js, and Terraform. It's assumed that the user has full access to the tenancy; if not, set `compartment_ocid` to a proper value.
+
+Exemplary code assumes that [OCI CLI is installed](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm) and an [access profile is defined](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliconfigure.htm).
 
 ### Create bucket
 
@@ -13,7 +15,7 @@ tenancy_ocid=$(oci iam availability-domain list --query 'data[0]."compartment-id
 
 # change here to your compartment
 compartment_ocid=$tenancy_ocid
-oci os bucket create --compartment-id $tenancy_ocid --name kv_store --versioning Enabled
+oci os bucket create --compartment-id $compartment_ocid --name kv_store --versioning Enabled
 ```
 
 ### Raw OCI CLI
@@ -68,9 +70,9 @@ cd tf_put && terraform destroy -auto-approve && cd ..
 
 Access control may be defined down to the resource level using wildcards. Moreover it's possible to specify any policy. Having both options, one bucket may be safely shared among different user groups to maintain the KV. Of course each group or service may use a dedicated bucket, which may simplify IAM policies.
 
-Announcing object level granular access control for OCI Object Storage, https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage
+Announcing object level granular access control for OCI Object Storage: [Object-level granular access](https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage)
 
-Deny policies, https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm
+Deny policies: [IAM deny policy syntax](https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm)
 
 ## Encryption
 
@@ -117,7 +119,7 @@ OCI Events service documentation: [Events Overview](https://docs.oracle.com/en-u
 
 ## Replication
 
-OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region.
+OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region. One target is supported.
 
 ```bash
 # enable replication to a target region
@@ -132,7 +134,7 @@ Objects in the destination bucket are read-only — writes must go to the source
 
 OCI Object Storage replication documentation: [Using Replication](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingreplication.htm)
 
-## OCI Secrets consideration
+## OCI Vault Secrets considerations
 
 OCI Vault Secrets is the native OCI service for storing sensitive values. The table below compares it with the Object Storage KV approach described in this document.
 
@@ -149,7 +151,7 @@ OCI Vault Secrets is the native OCI service for storing sensitive values. The ta
 | **Cloud Events** | Object create/update/delete via OCI Events service | Secret create/update/delete and expiry events via OCI Events service |
 | **CLI put** | `oci os object put` | `oci vault secret create-base64` |
 | **CLI get** | `oci os object get` | `oci secrets secret-bundle get` |
-| **Replication** | Cross-region replication via replication policies (bucket level) | Per-secret cross-region replication to up to 3 regions; replicas are read-only |
+| **Replication** | Cross-region replication via replication policies to one region | Per-secret cross-region replication to up to 3 regions; replicas are read-only |
 | **Cost** | Object Storage pricing (per GiB + requests) | Vault pricing (per secret version per month) |
 
 ## When to use Object Storage KV
