@@ -119,7 +119,7 @@ OCI Events service documentation: [Events Overview](https://docs.oracle.com/en-u
 
 ## Replication
 
-OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region. One target is supported.
+OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region. One target is supported. 
 
 ```bash
 # enable replication to a target region
@@ -133,6 +133,8 @@ oci os replication create-replication-policy \
 Objects in the destination bucket are read-only — writes must go to the source bucket. Replication is useful for disaster recovery and read-latency reduction in multi-region deployments.
 
 OCI Object Storage replication documentation: [Using Replication](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingreplication.htm)
+
+> **Note:** Replication makes the KV store global. To keep configuration bound to a specific region, replication should not be used, or a region identifier should be added to the key (e.g. `eu-zurich-1/my_key`).
 
 ## OCI Vault Secrets considerations
 
