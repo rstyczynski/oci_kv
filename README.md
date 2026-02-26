@@ -2,11 +2,29 @@
 
 Key-Value is a fundamental paradigm in configuration. OCI provides two services that may be used to build a KV interface. First is an OCI Secret that stores values associated with keys, the second is the OCI Object Storage service, which ideally fits KV requirements. Both services support an IAM access layer that controls access to the granularity of an object and object versioning.
 
+## Contents
+
+- [Example](#example)
+  - [Create bucket](#create-bucket)
+  - [Raw OCI CLI](#raw-oci-cli)
+  - [Bash](#bash)
+  - [Node.js](#nodejs)
+  - [Terraform](#terraform)
+- [Access control](#access-control)
+- [Encryption](#encryption)
+- [Versioning](#versioning)
+- [Cloud events](#cloud-events)
+- [Replication](#replication)
+- [OCI Vault Secrets considerations](#oci-vault-secrets-considerations)
+- [When to use Object Storage KV](#when-to-use-object-storage-kv)
+- [When to use OCI Vault Secrets](#when-to-use-oci-vault-secrets)
+- [References](#references)
+
 ## Example
 
 The example below demonstrates how to use OCI Object Storage for KV purposes. It creates a KV bucket to execute a series of put, get, and delete operations using OCI CLI, bash, Node.js, and Terraform. It's assumed that the user has full access to the tenancy; if not, set `compartment_ocid` to a proper value.
 
-Exemplary code assumes that [OCI CLI is installed](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm) and an [access profile is defined](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliconfigure.htm).
+Exemplary code assumes that OCI CLI is installed and an access profile is defined.
 
 ### Create bucket
 
@@ -67,8 +85,6 @@ cd tf_put && terraform destroy -auto-approve && cd ..
 
 Access control may be defined down to the resource level using wildcards. Moreover it's possible to specify any policy. Having both options, one bucket may be safely shared among different user groups to maintain the KV. Of course each group or service may use a dedicated bucket, which may simplify IAM policies.
 
-Announcing object level granular access control for OCI Object Storage: [Object-level granular access](https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage) Deny policies: [IAM deny policy syntax](https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm)
-
 ## Encryption
 
 Each bucket may be encrypted using a customer managed encryption key (MEK), which makes Object Storage equivalent to OCI Secret at a security level.
@@ -112,8 +128,6 @@ Relevant event types:
 
 Each event payload includes the bucket name, object name, namespace, and event time, making it straightforward to route events by key prefix using OCI Events rule conditions.
 
-OCI Events service documentation: [Events Overview](https://docs.oracle.com/en-us/iaas/Content/Events/Concepts/eventsoverview.htm)
-
 ## Replication
 
 OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region. One target is supported. 
@@ -128,8 +142,6 @@ oci os replication create-replication-policy \
 ```
 
 Objects in the destination bucket are read-only — writes must go to the source bucket. Replication is useful for disaster recovery and read-latency reduction in multi-region deployments.
-
-OCI Object Storage replication documentation: [Using Replication](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingreplication.htm)
 
 > **Note:** Replication makes the KV store global. To keep configuration bound to a specific region, replication should not be used, or a region identifier should be added to the key (e.g. `eu-zurich-1/my_key`).
 
@@ -166,3 +178,13 @@ OCI Vault Secrets is the native OCI service for storing sensitive values. The ta
 - Automated secret rotation is required
 - Strict expiry and lifecycle management is needed
 - Compliance requirements mandate a dedicated secrets manager
+
+## References
+
+- [OCI CLI Installation](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm)
+- [OCI CLI Configuration](https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliconfigure.htm)
+- [Object-level granular access for OCI Object Storage](https://blogs.oracle.com/cloud-infrastructure/object-level-granular-access-oci-object-storage)
+- [IAM deny policy syntax](https://docs.oracle.com/en-us/iaas/Content/Identity/policysyntax/denypolicies.htm)
+- [OCI Events service overview](https://docs.oracle.com/en-us/iaas/Content/Events/Concepts/eventsoverview.htm)
+- [OCI Object Storage: Using Replication](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingreplication.htm)
+
