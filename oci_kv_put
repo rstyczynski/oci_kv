@@ -8,4 +8,4 @@ set -euo pipefail
 bucket="${OCI_KV_STORE:-kv_store}"
 key="${1:?Usage: oci_kv_put <key>}"
 
-oci os object put --bucket-name "$bucket" --name "$key" --file -
+oci os object put --bucket-name "$bucket" --name "$key" --file - --force

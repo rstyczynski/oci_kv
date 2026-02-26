@@ -79,3 +79,89 @@ Each bucket may be encrypted using a customer managed encryption key (MEK), whic
 ## Versioning
 
 Object Storage may version objects, meaning that when a new object is written with an existing key name, the previous value is preserved as a prior version. Users may access any historical version of a key's value by providing its version identifier.
+
+```bash
+# write and save the version id
+echo -n "version 1" | ./oci_kv_put ver1
+version_id=$(oci os object list-object-versions --bucket-name kv_store --prefix ver1 \
+  --query 'data[?name==`ver1`]|[-1]."version-id"' --raw-output)
+
+echo -n "version 2" | ./oci_kv_put ver1
+
+# get latest version
+./oci_kv_get ver1
+
+# list versions
+oci os object list-object-versions --bucket-name kv_store --prefix ver1 \
+  --query 'data[?name==`ver1`].{version:"version-id", modified:"time-modified"}'
+
+# get intended version
+oci os object get --bucket-name kv_store --name ver1 --version-id "$version_id" --file /dev/stdout
+```
+
+The above requires a little effort, but it is intended to be used in special situations.
+
+## Cloud events
+
+OCI Object Storage emits events for every object operation. These events can trigger OCI Functions, Notifications, or Streaming pipelines, enabling reactive architectures on top of the KV store.
+
+Relevant event types:
+
+- `com.oraclecloud.objectstorage.createobject` — fired on `put` (key created or updated)
+- `com.oraclecloud.objectstorage.updateobject` — fired on metadata update
+- `com.oraclecloud.objectstorage.deleteobject` — fired on `delete`
+
+Each event payload includes the bucket name, object name, namespace, and event time, making it straightforward to route events by key prefix using OCI Events rule conditions.
+
+OCI Events service documentation: [Events Overview](https://docs.oracle.com/en-us/iaas/Content/Events/Concepts/eventsoverview.htm)
+
+## Replication
+
+OCI Object Storage supports automatic cross-region replication at the bucket level. Once a replication policy is set on the source bucket, every object put or delete is asynchronously replicated to the target bucket in another region.
+
+```bash
+# enable replication to a target region
+oci os replication create-replication-policy \
+  --bucket-name kv_store \
+  --name kv_store_replication \
+  --destination-region eu-frankfurt-1 \
+  --destination-bucket kv_store
+```
+
+Objects in the destination bucket are read-only — writes must go to the source bucket. Replication is useful for disaster recovery and read-latency reduction in multi-region deployments.
+
+OCI Object Storage replication documentation: [Using Replication](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingreplication.htm)
+
+## OCI Secrets consideration
+
+OCI Vault Secrets is the native OCI service for storing sensitive values. The table below compares it with the Object Storage KV approach described in this document.
+
+| Feature | OCI Object Storage KV | OCI Vault Secrets |
+| --- | --- | --- |
+| **Primary purpose** | General-purpose KV store | Secrets management (credentials, keys, tokens) |
+| **Value size** | Up to 10 GiB per object | Up to 25 KiB per secret |
+| **Versioning** | Built-in, unlimited versions | Built-in, up to 100 versions per secret |
+| **Access control** | IAM policy down to object name (wildcard) | IAM policy down to individual secret |
+| **Encryption** | Oracle-managed or customer-managed key (MEK) | Always encrypted; customer-managed key via Vault |
+| **Secret rotation** | Manual (put new value) | Automated rotation via functions |
+| **Expiry / lifecycle** | Object lifecycle rules (time-based deletion) | Secret expiry date, auto-disable/delete |
+| **Audit** | OCI Audit log | OCI Audit log |
+| **Cloud Events** | Object create/update/delete via OCI Events service | Secret create/update/delete and expiry events via OCI Events service |
+| **CLI put** | `oci os object put` | `oci vault secret create-base64` |
+| **CLI get** | `oci os object get` | `oci secrets secret-bundle get` |
+| **Replication** | Cross-region replication via replication policies (bucket level) | Per-secret cross-region replication to up to 3 regions; replicas are read-only |
+| **Cost** | Object Storage pricing (per GiB + requests) | Vault pricing (per secret version per month) |
+
+## When to use Object Storage KV
+
+- Values are large (configs, certificates, binary blobs)
+- Many keys with wildcard-based access control per key prefix
+- Simple put/get interface without secret lifecycle overhead
+- Cost-sensitive workloads with many keys
+
+## When to use OCI Vault Secrets
+
+- Storing credentials, API keys, passwords, or tokens
+- Automated secret rotation is required
+- Strict expiry and lifecycle management is needed
+- Compliance requirements mandate a dedicated secrets manager
