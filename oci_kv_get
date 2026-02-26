@@ -1,0 +1,10 @@
+#!/bin/bash
+# Usage: oci_kv_get <bucket> <key>
+#        oci_kv_get <bucket> <key> > file
+
+set -euo pipefail
+
+bucket="${1:?Usage: oci_kv_get <bucket> <key>}"
+key="${2:?Usage: oci_kv_get <bucket> <key>}"
+
+oci os object get --bucket-name "$bucket" --name "$key" --file /dev/stdout

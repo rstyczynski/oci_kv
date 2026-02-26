@@ -1,0 +1,10 @@
+#!/bin/bash
+# Usage: echo "value" | oci_kv_put <bucket> <key>
+#        oci_kv_put <bucket> <key> < file
+
+set -euo pipefail
+
+bucket="${1:?Usage: oci_kv_put <bucket> <key>}"
+key="${2:?Usage: oci_kv_put <bucket> <key>}"
+
+oci os object put --bucket-name "$bucket" --name "$key" --file -
