@@ -13,7 +13,7 @@ Exemplary code assumes that [OCI CLI is installed](https://docs.oracle.com/en-us
 ```bash
 tenancy_ocid=$(oci iam availability-domain list --query 'data[0]."compartment-id"' --raw-output)
 
-# change here to your compartment
+# change here to use bucket in your compartment
 compartment_ocid=$tenancy_ocid
 oci os bucket create --compartment-id $compartment_ocid --name kv_store --versioning Enabled
 ```
